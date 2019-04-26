@@ -1,4 +1,4 @@
-package com.cl.wscall;
+package com.cl.cloud;
 
 import org.junit.Test;
 
