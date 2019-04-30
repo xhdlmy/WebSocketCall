@@ -3,7 +3,12 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/WebSocketCall.iml" filepath="$PROJECT_DIR$/WebSocketCall.iml" />
+      <module fileurl="file://D:\WORK\WebSocketCall\alive_module\alive_module.iml" filepath="D:\WORK\WebSocketCall\alive_module\alive_module.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://D:\WORK\WebSocketCall\module_base\base_module.iml" filepath="D:\WORK\WebSocketCall\module_base\base_module.iml" />
+      <module fileurl="file://$PROJECT_DIR$/common_base/common_base.iml" filepath="$PROJECT_DIR$/common_base/common_base.iml" />
+      <module fileurl="file://D:\WORK\WebSocketCall\common_base\module_base.iml" filepath="D:\WORK\WebSocketCall\common_base\module_base.iml" />
+      <module fileurl="file://$PROJECT_DIR$/module_keepalive/module_keepalive.iml" filepath="$PROJECT_DIR$/module_keepalive/module_keepalive.iml" />
     </modules>
   </component>
 </project>

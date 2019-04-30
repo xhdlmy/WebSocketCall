@@ -26,6 +26,8 @@
         Service
         -->
         <service android:name=".service.NetworkStateService"/>
+
+
     </application>
 
 </manifest>
