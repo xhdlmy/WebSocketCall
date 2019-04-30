@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.xhd.alive">
+
+    <!--Android账户同步权限-->
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
+    <!--开机广播-->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <application
+        android:name=".module.App"
+        android:allowBackup="true"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <!--KeepAlive OnePixelActivity-->
+        <activity android:name=".module.MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name="com.xhd.alive.OnePixelActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:finishOnTaskLaunch="false"
+            android:launchMode="singleInstance"
+            android:theme="@style/TransparentStyle"/>
+
+        <!--KeepAliveService：将进程优先级提高-->
+        <service android:name="com.xhd.alive.KeepAliveService"/>
+        <!--startForeground NotificationId 取消可感通知-->
+        <service android:name="com.xhd.alive.KeepAliveManager$NotificationHideService"/>
+
+        <!--Android5.0-Android7.0拉活方案：JobScheduler 异步任务拉起 JobService 服务，需要声明 BIND_JOB_SERVICE 权限-->
+        <service android:name="com.xhd.alive.JobSchedulerService"
+            android:permission="android.permission.BIND_JOB_SERVICE"/>
+
+        <!--Android同步机制：适用于Android7.0以下-->
+        <!--建立账户-->
+        <service android:name="com.xhd.alive.AccountService"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/account_authenticator"/>
+        </service>
+        <!--账户自动同步-->
+        <service android:name="com.xhd.alive.AccountSyncService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter" />
+            </intent-filter>
+            <meta-data
+                android:name="android.content.SyncAdapter"
+                android:resource="@xml/account_sync_adapter" />
+        </service>
+    </application>
+
+</manifest>

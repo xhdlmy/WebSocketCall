@@ -1,0 +1,18 @@
+// extension —— 扩展
+project.ext {
+    setDefaultConfig = { extension ->
+        // 相对于 module 中的 build.gradle android {}的内容
+        extension.android{
+            compileSdkVersion rootProject.compileSdkVersion
+            buildToolsVersion rootProject.buildToolsVersion
+            defaultConfig {
+                minSdkVersion rootProject.minSdkVersion
+                targetSdkVersion rootProject.targetSdkVersion
+                versionCode rootProject.versionCode
+                versionName rootProject.versionName
+                testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+            }
+        }
+    }
+}
+
