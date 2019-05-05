@@ -177,7 +177,7 @@ public class KeepAliveManager {
     /*
    3. 利用 JobScheduler 对 Android5.0以上部分机型拉活
      */
-    public void startJobScheduler(Context context){
+    private void startJobScheduler(Context context){
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
             context.startService(new Intent(context, JobSchedulerService.class));
         }
@@ -186,21 +186,29 @@ public class KeepAliveManager {
     /*
     4. 利用账户同步功能对 Android8.0以下部分机型拉活
      */
-    public void syncAccount(Context context){
-        context.startService(new Intent(context, AccountService.class));
+    private void syncAccount(Context context){
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.O){
+            context.startService(new Intent(context, AccountService.class));
+        }
     }
 
     /*
-    正式开启保活
+    1-2 KeepAliveService
      */
-    public void startKeepAliveService(Context context){
+    private void startKeepAliveService(Context context, Class<? extends KeepAliveService> clazz){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             // Android8.0 同步机制手动同步后报错：Not allowed to start service Intent { cmp=com.xhd.alive/.service.KeepAliveService }: app is in background uid
             // Android8.0 后台执行限制（为了省电），不允许在后台直接 startService 服务
-            context.startForegroundService(new Intent(context, KeepAliveService.class));
+            context.startForegroundService(new Intent(context, clazz));
         }else{
-            context.startService(new Intent(context, KeepAliveService.class));
+            context.startService(new Intent(context, clazz));
         }
+    }
+
+    public void keepApplicaitonAlive(Context context, Class<? extends KeepAliveService> clazz){
+        startKeepAliveService(context, clazz);
+        syncAccount(context);
+        startJobScheduler(context);
     }
 
 }

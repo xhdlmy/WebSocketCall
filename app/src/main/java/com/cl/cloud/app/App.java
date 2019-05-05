@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 
+import com.cl.cloud.service.CloudService;
 import com.cl.cloud.service.NetworkStateService;
 import com.cl.cloud.websocket.WebSocketManager;
 import com.xhd.alive.KeepAliveManager;
@@ -19,11 +20,9 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         sContext = this;
-        startService(new Intent(this, NetworkStateService.class));
-        // 进程保活
-        KeepAliveManager.getInstance().startKeepAliveService(this);
-        KeepAliveManager.getInstance().startJobScheduler(this);
-        KeepAliveManager.getInstance().syncAccount(this);
+        // 进程保活 & 开启 WebSocket
+        KeepAliveManager.getInstance().keepApplicaitonAlive(sContext, CloudService.class);
+
     }
 
     public static Context getContext(){

@@ -41,10 +41,13 @@ public class WebSocketManager {
     private final String TAG = WebSocketManager.class.getSimpleName();
 
     private Context mContext;
+
     private String mWebSocketUrl;
+
     private OkHttpClient mOkHttpClient;
     private WebSocket mWebSocket;
     private Request mRequest;
+
     private WebSocketListener mWebSocketListener;
     private WsStatusListener mWsStatusListener;
     private OnNetworkStateChangedListener mNetworkListener;
@@ -121,6 +124,7 @@ public class WebSocketManager {
                 // code == 1000，正常关闭，但在该项目下，应该不会服务器主动关闭
                 runOnUIThread(() -> mWsStatusListener.onClosed(code, reason));
                 // TODO 重新连接 Reason1
+                newWebSocket();
             }
 
             // 由于读取或写入传出和传入消息的错误而关闭Web套接字时调用，消息可能已丢失。
@@ -130,6 +134,7 @@ public class WebSocketManager {
                 // 服务器端发送的错误
                 runOnUIThread(() -> mWsStatusListener.onFailure(t, response));
                 // TODO 重新连接 Reason1
+                newWebSocket();
             }
         };
 
@@ -139,9 +144,10 @@ public class WebSocketManager {
                 case NetworkUtils.TYPE_MOBILE:
                 case NetworkUtils.TYPE_WIFI:
                     // TODO 重新连接 Reason2
+                    newWebSocket();
                     break;
                 case NetworkUtils.NO_NET:
-                    Toast.makeText(mContext, R.string.error_no_net, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, R.string.error_no_net, Toast.LENGTH_LONG).show();
                     break;
             }
         };
@@ -150,11 +156,11 @@ public class WebSocketManager {
         App.getWebSocketManagerMap().put(mWebSocketUrl, this);
     }
 
-    private void newWebSocket(){
+    public void newWebSocket(){
         mOkHttpClient.newWebSocket(mRequest, mWebSocketListener);
     }
 
-    /*=======================================================================================*/
+    /*====================================Do on MainThread===================================================*/
 
     private void runOnUIThread(OnUIThreadListener listener){
         if(Looper.myLooper() != Looper.getMainLooper()){
@@ -168,6 +174,8 @@ public class WebSocketManager {
         void onUIThread();
     }
 
+    /*====================================NetworkState============================================*/
+
     public OnNetworkStateChangedListener getNetworkListener(){
         return mNetworkListener;
     }
@@ -176,7 +184,7 @@ public class WebSocketManager {
         void onNetStateChanged(String type);
     }
 
-    /*=======================================================================================*/
+    /*======================================== Builder ===============================================*/
 
     public static final class Builder {
 

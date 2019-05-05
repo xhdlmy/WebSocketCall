@@ -46,7 +46,7 @@ Android Terminal(终端) 查看进程PID 和 优先级 oom_adj
         局限性：只能保证发生系统广播时拉活进程，但无法保证进程挂掉后立即拉活。
  */
 
-public class KeepAliveService extends Service {
+public abstract class KeepAliveService extends Service {
 
     private static final String TAG = KeepAliveService.class.getSimpleName();
 
@@ -55,7 +55,6 @@ public class KeepAliveService extends Service {
         super.onCreate();
         KeepAliveManager.getInstance().registerScreenReceiver(this);
         KeepAliveManager.getInstance().startServiceForeground(this);
-        // TODO 进程主线程中 WebSocket 的连接工作
         Log.i(TAG, "onCreate");
     }
 
