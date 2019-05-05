@@ -60,7 +60,9 @@
                 android:resource="@xml/account_sync_adapter" />
         </service>
 
-        <activity android:name=".module.MainActivity"></activity>
+        <meta-data
+            android:name="applicationId"
+            android:value="${APPLICATION_ID}"/>
     </application>
 
 </manifest>

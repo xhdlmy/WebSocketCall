@@ -2,13 +2,18 @@ package com.xhd.alive;
 
 
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.IBinder;
+import android.support.annotation.RequiresApi;
+import android.support.v4.app.NotificationCompat;
 
 public class KeepAliveManager {
 
@@ -90,22 +95,41 @@ public class KeepAliveManager {
     void startServiceForeground(KeepAliveService service){
         mKeepAliveService = service;
 
-        Notification.Builder builder = new Notification.Builder(service);
-        builder.setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle("")
-                .setContentText("")
-                .setTicker("");
-        Notification notification = builder.build();
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2) {
+        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.O){
+            String channelId = "1";
+            NotificationChannel channel = new NotificationChannel(channelId, "keepalive", NotificationManager.IMPORTANCE_NONE);
+            channel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+            NotificationManager notificationManager = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
+            assert notificationManager != null;
+            notificationManager.createNotificationChannel(channel);
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(service, channelId);
+            builder.setSmallIcon(R.mipmap.ic_launcher)
+                    .setContentTitle("")
+                    .setContentText("")
+                    .setTicker("");
+            Notification notification = builder.build();
             service.startForeground(NOTIFICATION_ID, notification);
-        } else if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2 && Build.VERSION.SDK_INT < Build.VERSION_CODES.N_MR1) {
-             // Android4.3-7.0，通知可以通过NotificationHideService来做到无感知
-            Intent innerIntent = new Intent(service, NotificationHideService.class);
-            service.startService(innerIntent);
-            service.startForeground(NOTIFICATION_ID, notification);
-        } else {
-            // 现状：Android7.1以上通知栏会出现一条"正在运行"的通知消息
-            service.startForeground(NOTIFICATION_ID, notification);
+        }else{
+            Notification.Builder builder = new Notification.Builder(service);
+            builder.setSmallIcon(R.mipmap.ic_launcher)
+                    .setContentTitle("")
+                    .setContentText("")
+                    .setTicker("");
+            Notification notification = builder.build();
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                service.startForeground(NOTIFICATION_ID, notification);
+            } else if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2 && Build.VERSION.SDK_INT < Build.VERSION_CODES.N_MR1) {
+                service.startForeground(NOTIFICATION_ID, notification);
+                // Android4.3-7.0，通知可以通过NotificationHideService来做到无感知
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+                    service.startForegroundService(new Intent(service, NotificationHideService.class));
+                }else{
+                    service.startService(new Intent(service, NotificationHideService.class));
+                }
+            } else {
+                // 现状：Android7.1以上通知栏会出现一条"正在运行"的通知消息
+                service.startForeground(NOTIFICATION_ID, notification);
+            }
         }
     }
 
@@ -116,7 +140,29 @@ public class KeepAliveManager {
     public static class NotificationHideService extends Service {
         @Override
         public int onStartCommand(Intent intent, int flags, int startId) {
-            startForeground(KeepAliveManager.NOTIFICATION_ID, new Notification());
+            if(Build.VERSION.SDK_INT > Build.VERSION_CODES.O){
+                String channelId = "1";
+                NotificationChannel channel = new NotificationChannel(channelId, "keepalive", NotificationManager.IMPORTANCE_NONE);
+                channel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+                NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+                assert notificationManager != null;
+                notificationManager.createNotificationChannel(channel);
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId);
+                builder.setSmallIcon(R.mipmap.ic_launcher)
+                        .setContentTitle("")
+                        .setContentText("")
+                        .setTicker("");
+                Notification notification = builder.build();
+                this.startForeground(NOTIFICATION_ID, notification);
+            }else{
+                Notification.Builder builder = new Notification.Builder(this);
+                builder.setSmallIcon(R.mipmap.ic_launcher)
+                        .setContentTitle("")
+                        .setContentText("")
+                        .setTicker("");
+                Notification notification = builder.build();
+                startForeground(KeepAliveManager.NOTIFICATION_ID, notification);
+            }
             stopForeground(true);
             stopSelf();
             return super.onStartCommand(intent, flags, startId);

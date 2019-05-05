@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">KeepProcessAlive</string>
-    <string name="title_activity_main">MainActivity</string>
+    <string name="account_authority">com.cl.cloud.account.provider</string>
+    <string name="account_authority_module">com.xhd.alive.account.provider</string>
+    <string name="account_type">com.cl.cloud.account.type</string>
+    <string name="account_type_module">com.xhd.alive.account.type</string>
 </resources>

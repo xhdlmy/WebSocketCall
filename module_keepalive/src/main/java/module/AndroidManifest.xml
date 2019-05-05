@@ -8,15 +8,17 @@
     <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
     <!--开机广播-->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!--前台进程 Android P-->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
-        android:name=".module.App"
+        android:name="com.xhd.alive.module.App"
         android:allowBackup="true"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <!--KeepAlive OnePixelActivity-->
-        <activity android:name=".module.MainActivity">
+        <activity android:name="com.xhd.alive.module.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -48,7 +50,7 @@
             </intent-filter>
             <meta-data
                 android:name="android.accounts.AccountAuthenticator"
-                android:resource="@xml/account_authenticator"/>
+                android:resource="@xml/account_authenticator_module"/>
         </service>
         <!--账户自动同步-->
         <service android:name="com.xhd.alive.AccountSyncService"
@@ -58,8 +60,13 @@
             </intent-filter>
             <meta-data
                 android:name="android.content.SyncAdapter"
-                android:resource="@xml/account_sync_adapter" />
+                android:resource="@xml/account_sync_adapter_module" />
         </service>
+
+        <meta-data
+            android:name="applicationId"
+            android:value="${APPLICATION_ID}"/>
+
     </application>
 
 </manifest>

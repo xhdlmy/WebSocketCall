@@ -6,9 +6,12 @@ import android.app.Service;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+
+import com.xhd.base.util.LogUtils;
 
 /**
  * Android 8.0 自动同步功能已经关闭，需要点击进行手动同步
@@ -22,8 +25,11 @@ public class AccountService extends Service {
 
     private Account mAccount;
 
+
+
     private void initConstant(Context context){
-        String packageName = "com.cl.clound";
+        String packageName = MetaUtils.getMetaStringData(context, "applicationId");
+        LogUtils.i("AccountPackage", packageName);
         ACCOUNT_TYPE = packageName + ".account.type";
         ACCOUNT_PROVIDER = packageName + ".account.provider";
     }
