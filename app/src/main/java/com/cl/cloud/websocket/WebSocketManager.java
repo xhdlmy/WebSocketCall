@@ -120,7 +120,7 @@ public class WebSocketManager {
                 // 服务器端发送的关闭，同时客户如果非正常关闭，那么会丢失数据吧
                 // code == 1000，正常关闭，但在该项目下，应该不会服务器主动关闭
                 runOnUIThread(() -> mWsStatusListener.onClosed(code, reason));
-                // TODO 重新连接 Reason1
+
                 newWebSocket();
             }
 
