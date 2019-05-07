@@ -21,18 +21,25 @@ import okhttp3.WebSocketListener;
 import okio.ByteString;
 
 /**
- 重连机制：重连意思是废弃原有WebSocket通道，创建一个新的WebSocket通道，发送连接请求，连接的过程也是通过发送HTTP请求实现的
- Reason1 触发服务端执行WebSocket的onclose方法，检测到onclose，表明连接断开，立即重新连接；
- Reason2 不触发服务端执行WebSocket的onclose方法，是客户端原因导致WebSocket断开连接：
-            在有网络的情况下，可以发送心跳包消息来告诉服务器客户端的连接是否存活（存活，则服务端可以发送消息；否则服可以触发服务端关闭服务端的连接；服务端应该也有类似的监测机制，保证消息发送不丢失）；
-                服务端做法：
-                如果连接在客户端非正常关闭了，也不会造成服务端发送的数据的丢失。服务端发送数据之前会检查 WebSocket 连接是否存在；
-                如果接收到重新连接请求，那么会记录该 WebSocket 状态，废弃之前的 WebSocket 通道，重新创建一个新的连接。
-         NAT超时(所以心跳包的主要作用是防止NAT超时, 其次是探测连接是否断开。)
-         如果客户端网络环境较差，切换网络，4G or Wifi，或者网络断开等因素，在检测到网络变化后进行重连；
- Reason3 客户端 WebSocket 所在进程挂了，无法发送心跳包，也无法重连，此时需要考虑的先是APP进程保活
+ 重连机制：重连意思是放弃（关闭）原有 RealWebSocket 连接（connection），重新发送连接请求。
 
- TODO 多线程问题？
+ TODO 1.如何保证服务端发送的数据不丢失？
+
+    1. 服务端发送 0x08 关闭指令，告知不会再发送数据了，数据不会丢失，客户端走 onClosing （本项目不存在）
+    2. 服务端端口异常关闭，那么客户端 ping 不通，走 onFailed 回调，进行重连即可
+    3. 客户端在意外情况下出现问题并没有通知到服务端是否需要停止发送指令，此时服务端继续发送会丢失一部分数据
+        解决方法:
+        3.1 服务端也有 ping 操作，如果 ping 不通，则停止发送消息，直到下一次客户端重新连接上服务端（如果接收到重新连接请求，那么会记录该 WebSocket 状态，废弃之前的 WebSocket 通道，继续发送消息）
+        3.2 客户端接口意外断开，则进行重连操作（也可以在有网络时顺便通知服务端，以前的 Socket 要关闭了）
+
+ TODO 2.客户端意外断开原因有？
+
+    1. NAT超时
+        所以客户端 ping 操作发送心跳包的主要作用是防止NAT超时, 其次是探测连接是否断开。
+    2. 客户端网络环境较差，切换网络，4G or Wifi，或者网络断开等因素
+        所以在检测到网络变化后就需要进行重连操作
+    3. 客户端 WebSocket 连接所在进程挂了
+        进程保活，然后第一时间重连操作
 
  */
 
@@ -42,55 +49,46 @@ public class WebSocketManager {
 
     private Context mContext;
 
-    private String mWebSocketUrl;
-
     private OkHttpClient mOkHttpClient;
-    private WebSocket mWebSocket;
+    private String mWebSocketUrl;
     private Request mRequest;
+    // 代表一个 WebSocket 连接客户端，可以进行 send data, cancel, close 操作
+    private WebSocket mWebSocket;
 
     private WebSocketListener mWebSocketListener;
     private WsStatusListener mWsStatusListener;
     private OnNetworkStateChangedListener mNetworkListener;
 
-    // WebSocket 通道本质是远程的跨进程通信，在 Client 端连接的就是该 APP 进程
-    // OkHttp 处理 WebSocket 通道传输的消息是分配了工作子线程，所以有一个 UI 线程转换问题
+    // UI 线程转换
     private Handler mHandler = new Handler(Looper.getMainLooper());
 
     public WebSocketManager(WebSocketManager.Builder builder) {
-        // 对同一个 url 的 WebSocketManager 做了缓存
+        // 有缓存，根据 url 获取缓存
         WebSocketManager webSocketManager = App.getWebSocketManagerMap().get(builder.mWebSocketUrl);
         if(webSocketManager != null){
             mContext = webSocketManager.mContext;
             mWebSocketUrl = webSocketManager.mWebSocketUrl;
             mOkHttpClient = webSocketManager.mOkHttpClient;
-            mWebSocket = webSocketManager.mWebSocket;
             mRequest = webSocketManager.mRequest;
             mWebSocketListener = webSocketManager.mWebSocketListener;
             mWsStatusListener = webSocketManager.mWsStatusListener;
             mNetworkListener = webSocketManager.mNetworkListener;
             return;
         }
-        // 无缓存，创建过程初始化
+        // 无缓存，第一次创建初始化参数
         mContext = builder.mContext;
         mWebSocketUrl = builder.mWebSocketUrl;
         mOkHttpClient = builder.mOkHttpClient;
         mWsStatusListener = builder.mWsStatusListener;
         if(mContext == null
                 || TextUtils.isEmpty(mWebSocketUrl)  || !(mWebSocketUrl.startsWith("ws://") || mWebSocketUrl.startsWith("wss://"))
-                || mOkHttpClient == null
-                || mWsStatusListener == null) {
-            Toast.makeText(mContext, mContext.getString(R.string.error_websocket_config), Toast.LENGTH_LONG).show();
-            // throw new Exception(mContext.getString(R.string.error_websocket_config));
+                || mOkHttpClient == null || mWsStatusListener == null) {
             return;
         }
-
         mRequest = new Request.Builder().url(mWebSocketUrl).build();
-
         mWebSocketListener = new WebSocketListener() {
             @Override
             public void onOpen(WebSocket webSocket, final Response response) {
-                // 代表一个 WebSocket 通道，可以对该通道进行 send close cancel等操作
-                mWebSocket = webSocket; //每次断线重连后都是一个新的 WebSocket 通道
                 Log.i(TAG, "client onOpen");
                 runOnUIThread(() -> mWsStatusListener.onOpen(response));
             }
@@ -107,20 +105,19 @@ public class WebSocketManager {
                 runOnUIThread(() -> mWsStatusListener.onMessage(bytes));
             }
 
-            // 当服务端指示不再传输传入消息时调用
+            // 当服务端指示不再传输传入消息时调用 （0x08指令）
             @Override
             public void onClosing(WebSocket webSocket, final int code, final String reason) {
                 Log.i(TAG, "client onClosing code " + code + " msg " + reason);
                 runOnUIThread(() -> mWsStatusListener.onClosing(code, reason));
-                // 客户端通知服务端可以完全关闭链接了
-                mWebSocket.close(code, reason);
+                mWebSocket.close(code, reason);// 客户端通知服务端可以完全关闭链接了，同时客户端也会走 onClosed
             }
 
-            // 当两个对等方都表示不再传输消息并且 连接已成功释放 时调用。
+            // 当两个对等方都表示不再传输消息并且连接已成功释放时调用。
             @Override
             public void onClosed(WebSocket webSocket, final int code, final String reason) {
                 Log.i(TAG, "client onClosed code " + code + " msg " + reason);
-                // 服务器端发送的关闭，如果非正常关闭，那么会丢失数据吧
+                // 服务器端发送的关闭，同时客户如果非正常关闭，那么会丢失数据吧
                 // code == 1000，正常关闭，但在该项目下，应该不会服务器主动关闭
                 runOnUIThread(() -> mWsStatusListener.onClosed(code, reason));
                 // TODO 重新连接 Reason1
@@ -157,7 +154,7 @@ public class WebSocketManager {
     }
 
     public void newWebSocket(){
-        mOkHttpClient.newWebSocket(mRequest, mWebSocketListener);
+        mWebSocket = mOkHttpClient.newWebSocket(mRequest, mWebSocketListener);
     }
 
     /*====================================Do on MainThread===================================================*/

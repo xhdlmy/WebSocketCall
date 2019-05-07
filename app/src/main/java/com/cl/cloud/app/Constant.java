@@ -9,5 +9,6 @@ import com.cl.cloud.R;
 public class Constant {
 
     public static final String WS_URL = App.getContext().getString(R.string.ws_uri);
+    public static final long PING_INTERVAL_MILLIS = 30 * 1000; // ping 操作的时间间隔
 
 }

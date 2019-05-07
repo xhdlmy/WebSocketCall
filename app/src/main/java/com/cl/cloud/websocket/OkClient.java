@@ -1,5 +1,9 @@
 package com.cl.cloud.websocket;
 
+import com.cl.cloud.app.Constant;
+
+import java.util.concurrent.TimeUnit;
+
 import okhttp3.OkHttpClient;
 
 /**
@@ -13,7 +17,9 @@ public class OkClient {
     private OkHttpClient mOkHttpClient;
 
     private OkClient(){
-        mOkHttpClient = new OkHttpClient();
+        mOkHttpClient = new OkHttpClient.Builder()
+                        .pingInterval(Constant.PING_INTERVAL_MILLIS, TimeUnit.MILLISECONDS)
+                        .build();
     }
 
     public static OkClient getInstance(){

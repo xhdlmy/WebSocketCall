@@ -11,5 +11,4 @@
         思路1: java 文件读取 gradle.properties 包名
         思路2: build.gradle applicationId 根据 gradle.properties 实时变换，读取 applicationId，代码读取 Androidmanifest.xml meta_data
         
-        
 # CloudService
