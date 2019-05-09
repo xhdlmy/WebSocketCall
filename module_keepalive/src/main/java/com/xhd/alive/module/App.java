@@ -8,10 +8,6 @@ public class App extends BaseApplication {
     @Override
     public void onCreate() {
         super.onCreate();
-        // 进程保活
-        KeepAliveManager.getInstance().startKeepAliveService(this);
-        KeepAliveManager.getInstance().startJobScheduler(this);
-        KeepAliveManager.getInstance().syncAccount(this);
     }
 
 }

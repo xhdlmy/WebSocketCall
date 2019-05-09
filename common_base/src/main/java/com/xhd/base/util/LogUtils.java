@@ -3,6 +3,26 @@ package com.xhd.base.util;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+/*
+
+if (bunny.isTouching(ladybug)) {
+
+    if (bunny.velocityY == 10) {
+      ladybug.height = 10;
+      ladybug.y = 350;
+      ladybug.active = false;
+      // 当你拥有胡萝卜时，就不要去碰到正在活动的瓢虫，不然你的胡萝卜会减少3个，所以要去踩它才对
+    } else if (ladybug.active) {
+      carrots = carrots - 3;
+      if (carrots < 0) {
+        carrots = 0;
+      }
+      ladybug.active =false;
+    }
+  }
+
+ */
+
 public class LogUtils {
     // 日志输出固定 TAG
     @NonNull

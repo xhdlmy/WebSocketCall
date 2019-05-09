@@ -20,6 +20,7 @@ public class CloudService extends KeepAliveService {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+
         // TODO 进程主线程中 WebSocket 的连接工作
         WebSocketManager.Builder builder = new WebSocketManager.Builder(this, Constant.WS_URL, OkClient.getInstance().getOkHttpClient(), new WsStatusListener() {
             @Override

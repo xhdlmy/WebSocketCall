@@ -24,7 +24,6 @@
             android:theme="@style/TransparentStyle" />
 
         <!-- KeepAliveService：将进程优先级提高 -->
-        <service android:name=".KeepAliveService" />
         <!-- startForeground NotificationId 取消可感通知 -->
         <service android:name=".KeepAliveManager$NotificationHideService" />
 

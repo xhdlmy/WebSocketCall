@@ -23,6 +23,9 @@ android {
 
 dependencies {
     api fileTree(dir: 'libs', include: ['*.jar'])
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     if(!isModuleRun.toBoolean()){
         api project(path: ':module_keepalive')
     }else{

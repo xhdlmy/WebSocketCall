@@ -9,15 +9,16 @@ import android.content.Context;
 
 public class BaseApplication extends Application {
 
-    public static BaseApplication sInstance;
+    protected static Context sContext;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        sInstance = this;
+        this.registerActivityLifecycleCallbacks(new ActivityLifecycleCallback());
+        sContext = this;
     }
 
     public static Context getAppContext(){
-        return sInstance;
+        return sContext;
     }
 }
