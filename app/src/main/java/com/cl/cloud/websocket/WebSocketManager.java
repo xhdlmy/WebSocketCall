@@ -10,8 +10,15 @@ import android.widget.Toast;
 
 import com.cl.cloud.R;
 import com.cl.cloud.app.App;
-import com.cl.cloud.util.NetworkUtils;
+import com.cl.cloud.app.Constant;
+import com.cl.cloud.protocol.ConnectMsg;
+import com.cl.cloud.util.SpUtils;
+import com.xhd.base.util.NetworkUtils;
+import com.xhd.base.util.ToastUtils;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -54,6 +61,7 @@ public class WebSocketManager {
     private Request mRequest;
     // 代表一个 WebSocket 连接客户端，可以进行 send data, cancel, close 操作
     private WebSocket mWebSocket;
+    private boolean mWebSocketIsAlive;
 
     private WebSocketListener mWebSocketListener;
     private WsStatusListener mWsStatusListener;
@@ -61,8 +69,16 @@ public class WebSocketManager {
 
     // UI 线程转换
     private Handler mHandler = new Handler(Looper.getMainLooper());
+    private Runnable mNoNetRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mHandler.postDelayed(this, Constant.HINT_NO_NET_MILLIS);
+            runOnUIThread(() -> ToastUtils.makeLong(mContext, R.string.error_no_net));
+        }
+    };
+    private ExecutorService mExecutor = Executors.newSingleThreadExecutor();
 
-    public WebSocketManager(WebSocketManager.Builder builder) {
+    private WebSocketManager(WebSocketManager.Builder builder) {
         // 有缓存，根据 url 获取缓存
         WebSocketManager webSocketManager = App.getWebSocketManagerMap().get(builder.mWebSocketUrl);
         if(webSocketManager != null){
@@ -90,7 +106,8 @@ public class WebSocketManager {
             @Override
             public void onOpen(WebSocket webSocket, final Response response) {
                 Log.i(TAG, "client onOpen");
-                runOnUIThread(() -> mWsStatusListener.onOpen(response));
+                mWebSocketIsAlive = true;
+                runOnUIThread(() -> mWsStatusListener.onOpen(webSocket, response));
             }
 
             @Override
@@ -117,10 +134,10 @@ public class WebSocketManager {
             @Override
             public void onClosed(WebSocket webSocket, final int code, final String reason) {
                 Log.i(TAG, "client onClosed code " + code + " msg " + reason);
+                mWebSocketIsAlive = false;
                 // 服务器端发送的关闭，同时客户如果非正常关闭，那么会丢失数据吧
                 // code == 1000，正常关闭，但在该项目下，应该不会服务器主动关闭
                 runOnUIThread(() -> mWsStatusListener.onClosed(code, reason));
-
                 newWebSocket();
             }
 
@@ -128,9 +145,9 @@ public class WebSocketManager {
             @Override
             public void onFailure(WebSocket webSocket, final Throwable t, final Response response) {
                 Log.i(TAG, "client onFailure throwable " + t.toString() + " response " + response);
+                mWebSocketIsAlive = false;
                 // 服务器端发送的错误
                 runOnUIThread(() -> mWsStatusListener.onFailure(t, response));
-                // TODO 重新连接 Reason1
                 newWebSocket();
             }
         };
@@ -140,11 +157,11 @@ public class WebSocketManager {
             switch (type) {
                 case NetworkUtils.TYPE_MOBILE:
                 case NetworkUtils.TYPE_WIFI:
-                    // TODO 重新连接 Reason2
+                    mHandler.removeCallbacks(mNoNetRunnable);
                     newWebSocket();
                     break;
                 case NetworkUtils.NO_NET:
-                    Toast.makeText(mContext, R.string.error_no_net, Toast.LENGTH_LONG).show();
+                    mHandler.post(mNoNetRunnable);
                     break;
             }
         };
@@ -155,6 +172,14 @@ public class WebSocketManager {
 
     public void newWebSocket(){
         mWebSocket = mOkHttpClient.newWebSocket(mRequest, mWebSocketListener);
+    }
+
+    public WebSocket getWebSocket(){
+        return mWebSocket;
+    }
+
+    public synchronized boolean ismWebSocketAlive(){
+        return mWebSocketIsAlive;
     }
 
     /*====================================Do on MainThread===================================================*/

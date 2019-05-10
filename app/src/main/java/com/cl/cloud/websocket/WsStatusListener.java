@@ -1,6 +1,7 @@
 package com.cl.cloud.websocket;
 
 import okhttp3.Response;
+import okhttp3.WebSocket;
 import okio.ByteString;
 
 /**
@@ -8,7 +9,7 @@ import okio.ByteString;
  */
 public abstract class WsStatusListener {
 
-  public void onOpen(Response response) {
+  public void onOpen(WebSocket webSocket, Response response) {
   }
 
   public void onMessage(String msg) {

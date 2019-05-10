@@ -1,7 +1,11 @@
 <resources>
-    <string name="app_name">WebSocketCall</string>
-    <string name="error_websocket_config">创建 WebSocket 参数错误</string>
+    <string name="app_name">自动外呼</string>
+
+    <string name="permission_call_phone">请允许获取电话权限</string>
+    <string name="permission_send_sms">请允许获取短信权限</string>
+
+    <string name="error_websocket_config">创建通道参数错误</string>
     <string name="error_no_net">网络断开</string>
-    <string name="ws_uri">ws://192.168.1.108:18888</string>
-    <string name="channelCode">jh001</string>
+
+
 </resources>

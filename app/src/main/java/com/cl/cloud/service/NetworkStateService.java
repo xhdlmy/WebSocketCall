@@ -9,8 +9,8 @@ import android.net.ConnectivityManager;
 import android.os.IBinder;
 
 import com.cl.cloud.app.App;
-import com.cl.cloud.util.NetworkUtils;
 import com.cl.cloud.websocket.WebSocketManager;
+import com.xhd.base.util.NetworkUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,8 +18,6 @@ import java.util.Set;
 
 public class NetworkStateService extends Service {
 
-    private static final String TAG = NetworkStateService.class.getSimpleName();
-    
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -27,7 +25,7 @@ public class NetworkStateService extends Service {
             String action = intent.getAction();
             if (!ConnectivityManager.CONNECTIVITY_ACTION.equals(action)) return;
             // 接收 ConnectivityManager.CONNECTIVITY_ACTION 网络变化的系统广播
-            String networkType = NetworkUtils.getNetworkType();
+            String networkType = NetworkUtils.getNetworkType(App.getAppContext());
             HashMap<String, WebSocketManager> wsMap = App.getWebSocketManagerMap();
             Set<Map.Entry<String, WebSocketManager>> entries = wsMap.entrySet();
             for (Map.Entry<String, WebSocketManager> entry : entries) {
