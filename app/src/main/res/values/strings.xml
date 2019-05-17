@@ -7,5 +7,10 @@
     <string name="error_websocket_config">创建通道参数错误</string>
     <string name="error_no_net">网络断开</string>
 
+    <string name="login">登录</string>
+    <string name="user_name">用户名</string>
+    <string name="please_input_user_name">请输入登录用户名</string>
+    <string name="user_pwd">密码</string>
+    <string name="please_input_user_pwd">请输入登录密码</string>
 
 </resources>

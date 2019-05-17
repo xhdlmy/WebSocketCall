@@ -76,7 +76,6 @@ public class WebSocketManager {
             runOnUIThread(() -> ToastUtils.makeLong(mContext, R.string.error_no_net));
         }
     };
-    private ExecutorService mExecutor = Executors.newSingleThreadExecutor();
 
     private WebSocketManager(WebSocketManager.Builder builder) {
         // 有缓存，根据 url 获取缓存
@@ -178,7 +177,7 @@ public class WebSocketManager {
         return mWebSocket;
     }
 
-    public synchronized boolean ismWebSocketAlive(){
+    public synchronized boolean isWebSocketAlive(){
         return mWebSocketIsAlive;
     }
 

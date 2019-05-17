@@ -1,15 +1,13 @@
 package com.cl.cloud.service;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.text.TextUtils;
 
 import com.cl.cloud.activity.LoginActivity;
+import com.cl.cloud.activity.MainActivity;
 import com.cl.cloud.app.App;
 import com.cl.cloud.app.Constant;
-import com.cl.cloud.protocol.ConnectMsg;
 import com.cl.cloud.push.PushEntity;
+import com.cl.cloud.util.ActivityHelper;
 import com.cl.cloud.util.LoginRequestHelper;
 import com.cl.cloud.util.SpUtils;
 import com.cl.cloud.websocket.OkClient;
@@ -17,22 +15,12 @@ import com.cl.cloud.websocket.WebSocketManager;
 import com.cl.cloud.websocket.WsStatusListener;
 import com.google.gson.JsonSyntaxException;
 import com.xhd.alive.KeepAliveService;
-import com.xhd.base.app.ActivityStackManager;
 import com.xhd.base.util.LogUtils;
-
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import com.xhd.base.util.ToastUtils;
 
 import okhttp3.Response;
 import okhttp3.WebSocket;
 import okio.ByteString;
-
-import static android.os.AsyncTask.execute;
-
-/**
- * Created by work2 on 2019/5/5.
- */
 
 public class CloudService extends KeepAliveService {
 
@@ -48,6 +36,8 @@ public class CloudService extends KeepAliveService {
 
                 @Override
                 public void onOpen(WebSocket webSocket, Response response) {
+                    // TODO 是否需要判断进程是否是被杀后拉起？
+                    // websocket login
                     LoginRequestHelper.login(CloudService.this);
                 }
 
@@ -58,9 +48,11 @@ public class CloudService extends KeepAliveService {
                         switch (entity.getType()) {
                             case CONNECT:
                                 if(entity.status == Constant.STATUS_SUCCESS){
-                                    // TODO 登录成功
+                                    SpUtils.getInstances().putIsLogin(true).commit();
+                                    ActivityHelper.gotoActivity(CloudService.this, MainActivity.class);
                                 }else{
-                                    LoginRequestHelper.gotoLoginActivity(CloudService.this);
+                                    SpUtils.getInstances().putIsLogin(false).commit();
+                                    ActivityHelper.gotoActivity(CloudService.this, LoginActivity.class);
                                 }
                                 break;
                             case AUTO_CALL_PUSH:
@@ -83,6 +75,16 @@ public class CloudService extends KeepAliveService {
                 public void onMessage(ByteString bytes) {
                     String msg = bytes.utf8();
                     onMessage(msg);
+                }
+
+                @Override
+                public void onClosed(int code, String reason) {
+                    SpUtils.getInstances().putIsLogin(false).commit();
+                }
+
+                @Override
+                public void onFailure(Throwable t, Response response) {
+                    SpUtils.getInstances().putIsLogin(false).commit();
                 }
             };
         }

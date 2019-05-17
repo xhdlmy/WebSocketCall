@@ -9,6 +9,7 @@ import android.net.ConnectivityManager;
 import android.os.IBinder;
 
 import com.cl.cloud.app.App;
+import com.cl.cloud.app.Constant;
 import com.cl.cloud.websocket.WebSocketManager;
 import com.xhd.base.util.NetworkUtils;
 
@@ -27,11 +28,8 @@ public class NetworkStateService extends Service {
             // 接收 ConnectivityManager.CONNECTIVITY_ACTION 网络变化的系统广播
             String networkType = NetworkUtils.getNetworkType(App.getAppContext());
             HashMap<String, WebSocketManager> wsMap = App.getWebSocketManagerMap();
-            Set<Map.Entry<String, WebSocketManager>> entries = wsMap.entrySet();
-            for (Map.Entry<String, WebSocketManager> entry : entries) {
-                WebSocketManager wsManager = entry.getValue();
-                wsManager.getNetworkListener().onNetStateChanged(networkType);
-            }
+            WebSocketManager wsManager = wsMap.get(Constant.WS_URL);
+            wsManager.getNetworkListener().onNetStateChanged(networkType);
         }
     };
 
