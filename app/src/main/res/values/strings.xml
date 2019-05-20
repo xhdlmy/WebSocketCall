@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">自动外呼</string>
 
+    <string name="permission_read_phone_state">请允许读取通话状态权限</string>
     <string name="permission_call_phone">请允许获取电话权限</string>
     <string name="permission_send_sms">请允许获取短信权限</string>
 
@@ -8,9 +9,24 @@
     <string name="error_no_net">网络断开</string>
 
     <string name="login">登录</string>
+    <string name="login_ing">登录中</string>
     <string name="user_name">用户名</string>
     <string name="please_input_user_name">请输入登录用户名</string>
     <string name="user_pwd">密码</string>
     <string name="please_input_user_pwd">请输入登录密码</string>
+    <string name="empty_name">用户名为空</string>
+    <string name="empty_pwd">密码为空</string>
+    <string name="login_failed">登录失败，重新登录</string>
+    <string name="exit_app">退出程序</string>
+    <string name="phone">电话</string>
+    <string name="sms">短信</string>
+    <string name="my">我的</string>
+
+    <string name="click_to_call">点击拨打：</string>
+    <string name="name">姓名</string>
+    <string name="time">时间</string>
+    <string name="sure">确认</string>
+    <string name="cancel">取消</string>
+    <string name="sure_call">确认拨打：</string>
 
 </resources>

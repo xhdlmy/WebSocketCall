@@ -18,6 +18,7 @@ public class OkClient {
 
     private OkClient(){
         mOkHttpClient = new OkHttpClient.Builder()
+                        // pingInterval != 0 则会发送心跳检测包
                         .pingInterval(Constant.PING_INTERVAL_MILLIS, TimeUnit.MILLISECONDS)
                         .build();
     }

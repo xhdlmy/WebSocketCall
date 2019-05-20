@@ -1,22 +1,28 @@
 package com.cl.cloud.service;
 
 import android.content.Intent;
+import android.os.Handler;
 
 import com.cl.cloud.activity.LoginActivity;
 import com.cl.cloud.activity.MainActivity;
 import com.cl.cloud.app.App;
 import com.cl.cloud.app.Constant;
+import com.cl.cloud.dao.ReceiveBean;
+import com.cl.cloud.dao.ReceiveBeanDaoAgent;
 import com.cl.cloud.push.PushEntity;
 import com.cl.cloud.util.ActivityHelper;
 import com.cl.cloud.util.LoginRequestHelper;
+import com.cl.cloud.util.NotificationHelper;
 import com.cl.cloud.util.SpUtils;
+import com.cl.cloud.util.TelePhonyHelper;
 import com.cl.cloud.websocket.OkClient;
 import com.cl.cloud.websocket.WebSocketManager;
 import com.cl.cloud.websocket.WsStatusListener;
 import com.google.gson.JsonSyntaxException;
 import com.xhd.alive.KeepAliveService;
 import com.xhd.base.util.LogUtils;
-import com.xhd.base.util.ToastUtils;
+
+import java.text.ParseException;
 
 import okhttp3.Response;
 import okhttp3.WebSocket;
@@ -28,6 +34,10 @@ public class CloudService extends KeepAliveService {
 
     private WsStatusListener wsStatusListener;
 
+    private Handler mHandler = App.getHandler();
+
+    private ReceiveBeanDaoAgent mDaoAgent = ReceiveBeanDaoAgent.getInstance();
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
@@ -36,9 +46,11 @@ public class CloudService extends KeepAliveService {
 
                 @Override
                 public void onOpen(WebSocket webSocket, Response response) {
-                    // TODO 是否需要判断进程是否是被杀后拉起？
+                    // 不需要判断进程是否是被杀后拉起，登录成功 or 失败都去对应的 Activity
                     // websocket login
-                    LoginRequestHelper.login(CloudService.this);
+                    String userName = SpUtils.getInstances().getUserName();
+                    String userPwd = SpUtils.getInstances().getUserPwd();
+                    LoginRequestHelper.login(CloudService.this, userName, userPwd);
                 }
 
                 @Override
@@ -48,21 +60,20 @@ public class CloudService extends KeepAliveService {
                         switch (entity.getType()) {
                             case CONNECT:
                                 if(entity.status == Constant.STATUS_SUCCESS){
-                                    SpUtils.getInstances().putIsLogin(true).commit();
                                     ActivityHelper.gotoActivity(CloudService.this, MainActivity.class);
                                 }else{
-                                    SpUtils.getInstances().putIsLogin(false).commit();
                                     ActivityHelper.gotoActivity(CloudService.this, LoginActivity.class);
                                 }
                                 break;
                             case AUTO_CALL_PUSH:
-
-                                break;
                             case AUTO_SEND_PUSH:
-
+                                dealPush(entity);
+                                // 存入本地
+                                String userName = SpUtils.getInstances().getUserName();
+                                ReceiveBean bean = new ReceiveBean(userName, entity);
+                                mDaoAgent.insert(bean);
                                 break;
                             case UN_DEFINE:
-
                                 break;
                         }
                     } catch (JsonSyntaxException exception){
@@ -77,15 +88,6 @@ public class CloudService extends KeepAliveService {
                     onMessage(msg);
                 }
 
-                @Override
-                public void onClosed(int code, String reason) {
-                    SpUtils.getInstances().putIsLogin(false).commit();
-                }
-
-                @Override
-                public void onFailure(Throwable t, Response response) {
-                    SpUtils.getInstances().putIsLogin(false).commit();
-                }
             };
         }
         WebSocketManager webSocketManager = new WebSocketManager.Builder(this)
@@ -95,6 +97,21 @@ public class CloudService extends KeepAliveService {
                 .build();
         webSocketManager.newWebSocket();
         return START_STICKY;
+    }
+
+    private void dealPush(PushEntity entity) {
+        PushEntity.MsgType type = entity.getType();
+        switch (type) {
+            case AUTO_CALL_PUSH:
+                // 自动拨号
+                TelePhonyHelper.dealCall(entity);
+                break;
+            case AUTO_SEND_PUSH:
+                // 发送短信
+                TelePhonyHelper.dealSms(entity);
+                break;
+        }
+
     }
 
 }

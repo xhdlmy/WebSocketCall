@@ -3,4 +3,22 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+
+    <color name="app">#FE572D</color>
+    <color name="warn">#FF1E00</color>
+    <color name="orange">#F09719</color>
+    <color name="orange_transparent">#33F09719</color>
+    <color name="orange_dark">#FF1E00</color>
+    <color name="dark">#333333</color>
+    <color name="gray">#666666</color>
+
+    <color name="mn_colorDialogWindowBg">#00000000</color>
+    <color name="mn_colorDialogTrans">#00000000</color>
+    <color name="mn_colorDialogViewBg">#b2000000</color>
+    <color name="mn_colorDialogTextColor">#ffffff</color>
+    <color name="mn_colorDialogProgressBarColor">#ffffff</color>
+    <color name="mn_colorDialogImageTintColor">#ffffff</color>
+    <color name="mn_colorDialogProgressBarBgColor">#b4b4b4</color>
+    <color name="mn_colorDialogProgressBarProgressColor">#FFFFFF</color>
+    <color name="mn_colorDialogProgressBarSecondProgressColor">#ff9c9c</color>
 </resources>

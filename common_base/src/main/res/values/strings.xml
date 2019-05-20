@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">BaseModule</string>
+
+    <string name="loading">加载中</string>
+    <string name="load_more">加载更多</string>
+    <string name="load_fail">加载失败，点击重试</string>
+    <string name="load_end">加载完毕</string>
+    <string name="retry_load">重新加载</string>
+    <string name="empty_list">列表数据为空</string>
+    <string name="recycle_end">---我也是有底线的---</string>
+
 </resources>

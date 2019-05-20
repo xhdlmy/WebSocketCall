@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'org.greenrobot.greendao'
 apply from: "${rootProject.rootDir}/config.gradle"
 
 android {
@@ -38,4 +39,12 @@ dependencies {
 
 }
 
+greendao {
+    // 数据库schema版本
+    schemaVersion 1 // 安装、升级一定要注意升级版本问题
+    // 设置DaoMaster DaoSession Dao包名，默认的是bean所在的包名
+    //daoPackage 'com.cl.lending.model.greendao'
+    //设置DaoMaster DaoSeeeion Dao目录，默认是build/generated/source/greendao
+    //targetGenDir 'src/main/greendao'
+}
 

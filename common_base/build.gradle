@@ -30,4 +30,10 @@ dependencies {
     api 'com.google.code.gson:gson:2.8.0'
     api 'com.github.bumptech.glide:glide:4.7.1'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.7.1'
+
+    api 'org.greenrobot:greendao:3.2.2'
+//    implementation 'net.zetetic:android-database-sqlcipher:3.5.2'// 若缺失，则 GreenDao 混淆报错
+
 }
+
+
