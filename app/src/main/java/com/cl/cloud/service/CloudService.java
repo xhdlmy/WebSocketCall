@@ -20,6 +20,7 @@ import com.cl.cloud.websocket.WebSocketManager;
 import com.cl.cloud.websocket.WsStatusListener;
 import com.google.gson.JsonSyntaxException;
 import com.xhd.alive.KeepAliveService;
+import com.xhd.base.util.DateUtils;
 import com.xhd.base.util.LogUtils;
 
 import java.text.ParseException;
@@ -70,7 +71,13 @@ public class CloudService extends KeepAliveService {
                                 dealPush(entity);
                                 // 存入本地
                                 String userName = SpUtils.getInstances().getUserName();
-                                ReceiveBean bean = new ReceiveBean(userName, entity);
+                                long createTime = 0;
+                                try {
+                                    createTime = DateUtils.parseDate(entity.respTime, DateUtils.TIMESTAMP_PATTERN).getTime();
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                }
+                                ReceiveBean bean = new ReceiveBean(userName, createTime, entity, entity.getType());
                                 mDaoAgent.insert(bean);
                                 break;
                             case UN_DEFINE:
@@ -111,7 +118,6 @@ public class CloudService extends KeepAliveService {
                 TelePhonyHelper.dealSms(entity);
                 break;
         }
-
     }
 
 }

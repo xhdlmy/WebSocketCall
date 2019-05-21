@@ -28,5 +28,8 @@
     <string name="sure">确认</string>
     <string name="cancel">取消</string>
     <string name="sure_call">确认拨打：</string>
+    <string name="app_introduce">APP简介</string>
+    <string name="login_out">退出登录</string>
+    <string name="comfirm_login_out">你确认退出登录么？</string>
 
 </resources>

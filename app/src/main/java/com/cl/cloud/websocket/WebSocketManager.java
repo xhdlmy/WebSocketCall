@@ -173,6 +173,10 @@ public class WebSocketManager {
         mWebSocket = mOkHttpClient.newWebSocket(mRequest, mWebSocketListener);
     }
 
+    public void closeWebSocket(String reason){
+        mWebSocket.close(1000, reason);
+    }
+
     public WebSocket getWebSocket(){
         return mWebSocket;
     }

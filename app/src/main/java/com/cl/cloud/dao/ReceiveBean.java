@@ -10,6 +10,7 @@ import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.Keep;
 import org.greenrobot.greendao.converter.PropertyConverter;
 import org.greenrobot.greendao.annotation.Generated;
+import com.cl.cloud.push.PushEntity.MsgType;
 
 /**
  * Created by work2 on 2019/5/20.
@@ -21,20 +22,28 @@ public class ReceiveBean {
     @Id(autoincrement = true)
     Long id;
     String userName;
+    long createTime;
     @Convert(converter = PushEntityConverter.class, columnType = String.class)
     PushEntity pushEntity;
+    @Convert(converter = PushTypeConverter.class, columnType = Integer.class)
+    PushEntity.MsgType msgType;
 
-    @Generated(hash = 1293362969)
-    public ReceiveBean(Long id, String userName, PushEntity pushEntity) {
+    @Generated(hash = 359812667)
+    public ReceiveBean(Long id, String userName, long createTime, PushEntity pushEntity,
+            PushEntity.MsgType msgType) {
         this.id = id;
         this.userName = userName;
+        this.createTime = createTime;
         this.pushEntity = pushEntity;
+        this.msgType = msgType;
     }
 
     @Keep
-    public ReceiveBean(String userName, PushEntity pushEntity) {
+    public ReceiveBean(String userName, long createTime, PushEntity pushEntity, PushEntity.MsgType msgType) {
         this.userName = userName;
+        this.createTime = createTime;
         this.pushEntity = pushEntity;
+        this.msgType = msgType;
     }
 
     @Generated(hash = 61988218)
@@ -65,6 +74,22 @@ public class ReceiveBean {
         this.pushEntity = pushEntity;
     }
 
+    public long getCreateTime() {
+        return this.createTime;
+    }
+
+    public void setCreateTime(long createTime) {
+        this.createTime = createTime;
+    }
+
+    public PushEntity.MsgType getMsgType() {
+        return this.msgType;
+    }
+
+    public void setMsgType(PushEntity.MsgType msgType) {
+        this.msgType = msgType;
+    }
+
     @Keep
     public static class PushEntityConverter implements PropertyConverter<PushEntity, String> {
 
@@ -79,6 +104,20 @@ public class ReceiveBean {
         @Override
         public String convertToDatabaseValue(PushEntity entityProperty) {
             return mGson.toJson(entityProperty);
+        }
+    }
+
+    @Keep
+    public static class PushTypeConverter implements PropertyConverter<PushEntity.MsgType, Integer> {
+
+        @Override
+        public PushEntity.MsgType convertToEntityProperty(Integer databaseValue) {
+            return PushEntity.MsgType.getType(databaseValue);
+        }
+
+        @Override
+        public Integer convertToDatabaseValue(PushEntity.MsgType typeProperty) {
+            return typeProperty.getIndex();
         }
     }
 

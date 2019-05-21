@@ -6,6 +6,7 @@ import com.cl.cloud.util.SpUtils;
 
 import org.greenrobot.greendao.Property;
 import org.greenrobot.greendao.query.QueryBuilder;
+import org.greenrobot.greendao.query.WhereCondition;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -55,41 +56,32 @@ public class ReceiveBeanDaoAgent {
         return sDao.loadAll();
     }
 
-    public List<ReceiveBean> queryUserBeans(){
-        List<ReceiveBean> receiveBeans = queryAll();
-        ReceiveBean receiveBean = receiveBeans.get(0);
-        PushEntity pushEntity = receiveBean.getPushEntity();
-        pushEntity.getType();
-
+    /**
+     * 1 按时间顺序降序排列
+     * 2 符合该用户的名单
+     * 3 只获取该获取的数量
+     * 4 根据 Type 获取不同类型数据
+     */
+    public List<ReceiveBean> queryReciveBeans(int page, int perPageCount, PushEntity.MsgType msgType){
         String userName = SpUtils.getInstances().getUserName();
-        QueryBuilder<ReceiveBean> qb = sDao.queryBuilder().where(
-                ReceiveBeanDao.Properties.UserName.eq(userName));
-        if(qb.list() == null || qb.list().size() == 0) return null;
-        return qb.list();
+        QueryBuilder<ReceiveBean> qb = sDao.queryBuilder()
+                .orderDesc(ReceiveBeanDao.Properties.CreateTime)
+                .where(ReceiveBeanDao.Properties.UserName.eq(userName))
+                .where(ReceiveBeanDao.Properties.MsgType.eq(msgType))
+                .limit(page * perPageCount);
+        if(qb.list() == null || qb.list().size() == 0) return new ArrayList<>();
+        List<ReceiveBean> list = qb.list();
+        int startIndex = (page - 1) * perPageCount - 1;
+        int endIndex = page * perPageCount - 1;
+        return list.subList(startIndex, endIndex);
     }
 
-    public List<ReceiveBean> queryAutoCallBeans(){
-        List<ReceiveBean> list = new ArrayList<>();
-        List<ReceiveBean> receiveBeans = queryUserBeans();
-        for (ReceiveBean receiveBean : receiveBeans) {
-            PushEntity pushEntity = receiveBean.getPushEntity();
-            if(PushEntity.MsgType.AUTO_CALL_PUSH.equals(pushEntity.getType())){
-                list.add(receiveBean);
-            }
-        }
-        return list;
+    public List<ReceiveBean> queryAutoCallBeans(int page, int perPageCount){
+        return queryReciveBeans(page, perPageCount, PushEntity.MsgType.AUTO_CALL_PUSH);
     }
 
-    public List<ReceiveBean> querySendSmsBeans(){
-        List<ReceiveBean> list = new ArrayList<>();
-        List<ReceiveBean> receiveBeans = queryUserBeans();
-        for (ReceiveBean receiveBean : receiveBeans) {
-            PushEntity pushEntity = receiveBean.getPushEntity();
-            if(PushEntity.MsgType.AUTO_SEND_PUSH.equals(pushEntity.getType())){
-                list.add(receiveBean);
-            }
-        }
-        return list;
+    public List<ReceiveBean> querySendSmsBeans(int page, int perPageCount){
+        return queryReciveBeans(page, perPageCount, PushEntity.MsgType.AUTO_SEND_PUSH);
     }
 
 }
