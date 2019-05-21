@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--必须用自定义控件的类名，否则 XML 无法识别到自定义属性-->
+
+    <!-- MN_Dialog 自定义控件 MNProgressWheel -->
+    <declare-styleable name="MProgressWheel">
+        <attr name="mn_progressIndeterminate" format="boolean" />
+        <attr name="mn_barColor" format="color" />
+        <attr name="mn_rimColor" format="color" />
+        <attr name="mn_rimWidth" format="dimension" />
+        <attr name="mn_spinSpeed" format="float" />
+        <attr name="mn_barSpinCycleTime" format="integer" />
+        <attr name="mn_circleRadius" format="dimension" />
+        <attr name="mn_fillRadius" format="boolean" />
+        <attr name="mn_barWidth" format="dimension" />
+        <attr name="mn_linearProgress" format="boolean" />
+    </declare-styleable>
+    <!-- MN_Dialog 自定义控件 MNCircularProgressBar -->
+    <declare-styleable name="MCircularProgressBar">
+        <attr name="mn_progress" format="integer" />
+        <attr name="mn_progressbar_color" format="color" />
+        <attr name="mn_background_progressbar_color" format="color" />
+        <attr name="mn_progressbar_width" format="dimension" />
+        <attr name="mn_background_progressbar_width" format="dimension" />
+    </declare-styleable>
+
+    <!--RecyclerView 父控件 NestedScrolling 回弹效果-->
+    <declare-styleable name="NestedScrollingDragView">
+        <attr name="max_height" format="integer"></attr>
+    </declare-styleable>
+
+</resources>
